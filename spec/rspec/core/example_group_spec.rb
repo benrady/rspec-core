@@ -168,6 +168,12 @@ module Rspec::Core
         group.examples.size.should == 1
       end
 
+      it "should allow adding an example using 'its'" do
+        group = ExampleGroup.create
+        group.its(:some_method) { }
+        group.examples.size.should == 1
+      end
+
       it "should expose all examples at examples" do
         group = ExampleGroup.create
         group.it("should do something 1") { }
@@ -372,6 +378,26 @@ module Rspec::Core
 
       it "has 1 SelfObserver (2)" do
         SelfObserver.cache.length.should == 1
+      end
+    end
+
+    describe "example added with its" do
+      it "should have a subject_modifier" do
+        group    = ExampleGroup.create
+        examples = group.its(:some_method) { }
+        example  = examples.last
+        example.subject_modifier.should === :some_method
+      end
+    end
+
+    describe "#its" do
+      its(:class, "should be ExampleGroup") { should == Rspec::Core::ExampleGroup }
+      it "does not interfere between tests" do
+        subject.class.should == Rspec::Core::ExampleGroup
+      end
+      context "subject modified in before block" do
+        before { subject.class.should == Rspec::Core::ExampleGroup }
+        its(:class, "should be ExampleGroup") { should == Rspec::Core::ExampleGroup }
       end
     end
   end
